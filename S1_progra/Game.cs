@@ -31,6 +31,7 @@ namespace Promedio1.scripts
         private Historial ultimoHistorial;
 
         private Pila pilaLugares = new Pila();
+        private Cola colaEnemigos = new Cola();
 
         public Game(Player player)
         {
@@ -78,6 +79,7 @@ namespace Promedio1.scripts
                 {
                     EnemyList.Add(new Enemy("Enemigo " + (i + 1), p1, p2));
                 }
+                colaEnemigos.Agregar(EnemyList[i].name);
             }
         }
 
