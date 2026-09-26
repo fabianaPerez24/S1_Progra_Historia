@@ -323,7 +323,7 @@ namespace Promedio1.scripts
 
             Typewriter($"La vida actual del enemigo es... {enemy.life}\n");
             Typewriter("-------------------------------------------------------------- \n");
-            for (int i = 0; i < EnemyList.Count; i++) // revisamos si tenemos un enemigo muerto
+            for (int i = 0; i < EnemyList.Count; i++) 
             {
                 if (EnemyList[i].Dead() == false)
                 {
