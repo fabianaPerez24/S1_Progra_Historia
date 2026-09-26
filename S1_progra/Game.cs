@@ -56,13 +56,20 @@ namespace Promedio1.scripts
         {
             _player = new Player(p1, p2, p3);
         }
-        public void CreateEnemy(int x, int p1, int p2)
+        public void CreateEnemy(int x, int p1, int p2, string tipo = "normal")
         {
             EnemyList.Clear();
 
             for (int i = 0; i < x; i++)
             {
-                EnemyList.Add(new Enemy("Enemigo " + (i + 1), p1, p2));
+                if (tipo == "goblin")
+                {
+                    EnemyList.Add(new Goblin("Goblin " + (i + 1), p1, p2));
+                }
+                else
+                {
+                    EnemyList.Add(new Enemy("Enemigo " + (i + 1), p1, p2));
+                }
             }
         }
 
@@ -136,7 +143,7 @@ namespace Promedio1.scripts
 
             foreach (Enemy enemy in EnemyList)
             {
-                int playerHurt = enemy.PerformAttack(_player);
+                int playerHurt = enemy.Attack(_player);
 
                 Typewriter("--------------------------------------------------------------\n");
                 Typewriter($"[ENEMIGO] {enemy.name} atacó a {_player.name} e infligió {playerHurt} de daño.\n");
@@ -179,6 +186,30 @@ namespace Promedio1.scripts
                     Typewriter($"  - {item.Nombre}: {item.Descripcion}\n");
                 }
             }
+            bool tienePocion = false;
+
+            foreach (Item item in _player.Inventario)
+            {
+                if (item.Nombre == "Poción")
+                {
+                    tienePocion = true;
+                    break;
+                }
+            }
+
+            if (tienePocion)
+            {
+                Typewriter("\n¿Quieres usar una poción?\n");
+                Typewriter("1.- Sí\n");
+                Typewriter("2.- No\n");
+
+                int opcion = LeerNumero();
+
+                if (opcion == 1)
+                {
+                    UsePotion();
+                }
+            }
 
             Typewriter("-------------------------------------------------------------- \n");
         }
@@ -193,19 +224,31 @@ namespace Promedio1.scripts
             Typewriter($"Objeto: {nombre}\n");
             Typewriter($"Oro recibido: {oro}\n");
         }
+        public void GivePotion(int curacion)
+        {
+            Pocion potion = new Pocion(
+                "Poción",
+                $"Recupera {curacion} puntos de vida.",
+                curacion
+            );
+
+            _player.Inventario.Add(potion);
+
+            Typewriter("\n¡Has recibido una poción!\n");
+            Typewriter($"La poción recupera {curacion} puntos de vida.\n");
+        }
+        public Item BuscarItem(string nombre)
+        {
+            return _player.Inventario.Find(item => item.Nombre == nombre);
+        }
+        public Enemy BuscarEnemigoVivo()
+        {
+            return EnemyList.Find(enemy => !enemy.Dead());
+        }
+        
         public void UsePotion()
         {
-            Item potion = null;
-
-            foreach (Item item in _player.Inventario)
-            {
-                if (item.Nombre == "Poción")
-                {
-                    potion = item;
-                    break;
-                }
-            }
-
+            Item potion = BuscarItem("Poción");
             if (potion != null)
             {
                 _player.life += 20;
@@ -293,7 +336,7 @@ namespace Promedio1.scripts
             if (victory)
             {
                 Typewriter("\n¡Sobreviviste el bosque! Pero no has encontrado un tesoro aún, puedes continuar tu viaje.\n");
-                GiveReward("Poción", "Recupera 20 puntos de vida.", 0);
+                GivePotion(20);
             }
             else
                 Typewriter("\nFuiste derrotado en el bosque...\n");
@@ -382,14 +425,20 @@ namespace Promedio1.scripts
         private void Bridge()
         {
             Typewriter("LLegas al puente, y ves un grupo de 5 duendes atacando unas personas\n");
-            CreateEnemy(5, 15, 8);
+            CreateEnemy(5, 15, 8, "goblin");
 
             bool victory = Combat();
 
             if (victory)
-                Typewriter("\n Lograste derrotarlos! Y en su guarida encuentras todo lo que habian robado, oro y joyas. Ganaste!!.\n");
+            {
+                Typewriter("\nLograste derrotarlos! Y en su guarida encuentras todo lo que habían robado, oro y joyas.\n");
+
+                GiveReward("Joyas robadas", "Joyas recuperadas de la guarida de los duendes.", 150);
+            }
             else
+            {
                 Typewriter("\nFuiste derrotado en el puente...\n");
+            }
             FinishGame();
         }
         private void Lake()
