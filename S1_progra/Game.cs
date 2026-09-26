@@ -33,6 +33,8 @@ namespace Promedio1.scripts
         private Pila pilaLugares = new Pila();
         private Cola colaEnemigos = new Cola();
 
+        private ArbolBinario arbolLugares = new ArbolBinario();
+
         public Game(Player player)
         {
             _player = player;
@@ -41,6 +43,7 @@ namespace Promedio1.scripts
 
             AgregarHistorial(nodoActual.Nombre);
             pilaLugares.Agregar(nodoActual.Nombre);
+            arbolLugares.Agregar(nodoActual.Nombre);
         }
         public int LeerNumero()
         {
@@ -669,6 +672,7 @@ namespace Promedio1.scripts
                     nodoActual = nodoActual.Opciones[opcion - 1];
                     AgregarHistorial(nodoActual.Nombre);
                     pilaLugares.Agregar(nodoActual.Nombre);
+                    arbolLugares.Agregar(nodoActual.Nombre);
 
                     if (nodoActual.Accion != null)
                     {
