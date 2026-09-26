@@ -51,6 +51,7 @@
     <Compile Include="Interface_life.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Nodo.cs" />
+    <Compile Include="Pila.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Pocion.cs" />
     <Compile Include="Program.cs" />
