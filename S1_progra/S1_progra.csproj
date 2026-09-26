@@ -47,6 +47,7 @@
     <Compile Include="Enemy.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Goblin.cs" />
+    <Compile Include="Historial.cs" />
     <Compile Include="Interface_life.cs" />
     <Compile Include="Item.cs" />
     <Compile Include="Nodo.cs" />

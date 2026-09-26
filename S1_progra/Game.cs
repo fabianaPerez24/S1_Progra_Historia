@@ -27,11 +27,16 @@ namespace Promedio1.scripts
         private Nodo fuente;
         private Nodo casa;
 
+        private Historial inicioHistorial;
+        private Historial ultimoHistorial;
+
         public Game(Player player)
         {
             _player = player;
             CrearNodos();
             nodoActual = inicio;
+
+            AgregarHistorial(nodoActual.Nombre);
         }
         public int LeerNumero()
         {
@@ -186,6 +191,10 @@ namespace Promedio1.scripts
                     Typewriter($"  - {item.Nombre}: {item.Descripcion}\n");
                 }
             }
+
+            MostrarHistorial();
+
+            Typewriter("-------------------------------------------------------------- \n");
             bool tienePocion = false;
 
             foreach (Item item in _player.Inventario)
@@ -212,6 +221,39 @@ namespace Promedio1.scripts
             }
 
             Typewriter("-------------------------------------------------------------- \n");
+        }
+        private void AgregarHistorial(string lugar)
+        {
+            Historial nuevo = new Historial(lugar);
+
+            if (inicioHistorial == null)
+            {
+                inicioHistorial = nuevo;
+                ultimoHistorial = nuevo;
+            }
+            else
+            {
+                ultimoHistorial.Siguiente = nuevo;
+                ultimoHistorial = nuevo;
+            }
+        }
+        public void MostrarHistorial()
+        {
+            Typewriter("\n--- Lugares visitados ---\n");
+
+            Historial actual = inicioHistorial;
+
+            while (actual != null)
+            {
+                Typewriter(actual.Lugar);
+
+                if (actual.Siguiente != null)
+                    Typewriter(" -> ");
+
+                actual = actual.Siguiente;
+            }
+
+            Typewriter("\n");
         }
         public void GiveReward(string nombre, string descripcion, int oro)
         {
@@ -620,6 +662,7 @@ namespace Promedio1.scripts
                 if (opcion >= 1 && opcion <= nodoActual.Opciones.Count)
                 {
                     nodoActual = nodoActual.Opciones[opcion - 1];
+                    AgregarHistorial(nodoActual.Nombre);
 
                     if (nodoActual.Accion != null)
                     {
