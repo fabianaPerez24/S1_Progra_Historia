@@ -10,20 +10,59 @@ namespace Promedio1.scripts
 {
     internal class Game
     {
-        Jugador _player;
+        Player _player;
         Random rand = new Random();
+        private Nodo nodoActual;
+        private bool juegoTerminado = false;
+
+        private Nodo inicio;
+        private Nodo castillo;
+        private Nodo bosque;
+        private Nodo fuego;
+        private Nodo desierto;
+        private Nodo ciudad;
+        private Nodo bar;
+        private Nodo puente;
+        private Nodo lago;
+        private Nodo fuente;
+        private Nodo casa;
+
+        public Game(Player player)
+        {
+            _player = player;
+            CrearNodos();
+            nodoActual = inicio;
+        }
+        public int LeerNumero()
+        {
+            while (true)
+            {
+                try
+                {
+                    return int.Parse(Console.ReadLine());
+                }
+                catch (FormatException)
+                {
+                    Typewriter("Entrada inválida. Debes escribir un número.\n");
+                }
+                catch (OverflowException)
+                {
+                    Typewriter("El número es demasiado grande.\n");
+                }
+            }
+        }
         List<Enemy> EnemyList = new List<Enemy>();
-        Enemy test = new Enemy("", 0, 0);
         public void CreateCharacter(string p1, int p2, int p3)
         {
-            _player = new Jugador(p1, p2, p3);
+            _player = new Player(p1, p2, p3);
         }
         public void CreateEnemy(int x, int p1, int p2)
         {
+            EnemyList.Clear();
+
             for (int i = 0; i < x; i++)
             {
-                EnemyList.Add(test);
-                EnemyList[i] = new Enemy("enemigo " + i, p1, p2);
+                EnemyList.Add(new Enemy("Enemigo " + (i + 1), p1, p2));
             }
         }
 
@@ -44,7 +83,7 @@ namespace Promedio1.scripts
                 Typewriter("2.- Atacar\n");
                 Typewriter("3.- Ver tus stats\n");
 
-                int answers = int.Parse(Console.ReadLine());
+                int answers = LeerNumero();
 
                 switch (answers)
                 {
@@ -74,7 +113,7 @@ namespace Promedio1.scripts
 
                         EnemyCombat();
 
-                        if (!_player.Dead())
+                        if (_player.Dead())
                         {
                             Typewriter("\n¡Has muerto!\n");
                             FinishGame();
@@ -94,6 +133,7 @@ namespace Promedio1.scripts
         void EnemyCombat()
         {
             Typewriter("\n--- Turno de los enemigos ---\n");
+
             foreach (Enemy enemy in EnemyList)
             {
                 int playerHurt = enemy.PerformAttack(_player);
@@ -103,14 +143,15 @@ namespace Promedio1.scripts
                 Typewriter($"  Tu vida actual: {_player.life}\n");
                 Typewriter("--------------------------------------------------------------\n");
 
-                if (!_player.Dead()) break;
+                if (_player.Dead())
+                    break;
             }
         }
         void RemoveDeadEnemy()
         {
             for (int i = EnemyList.Count - 1; i >= 0; i--)
             {
-                if (!EnemyList[i].Dead())
+                if (EnemyList[i].Dead())
                 {
                     Typewriter($"  ☠ {EnemyList[i].name} ha sido derrotado!\n");
                     EnemyList.RemoveAt(i);
@@ -122,8 +163,66 @@ namespace Promedio1.scripts
         {
             Typewriter("-------------------------------------------------------------- \n");
             Typewriter($"Player..... Vida: {_player.life} / Daño: {_player.damage}\n");
+            Typewriter($"Oro........ {_player.Oro}\n");
+            Typewriter("-------------------------------------------------------------- \n");
+
+            Typewriter("Inventario:\n");
+
+            if (_player.Inventario.Count == 0)
+            {
+                Typewriter("  (Vacío)\n");
+            }
+            else
+            {
+                foreach (Item item in _player.Inventario)
+                {
+                    Typewriter($"  - {item.Nombre}: {item.Descripcion}\n");
+                }
+            }
+
             Typewriter("-------------------------------------------------------------- \n");
         }
+        public void GiveReward(string nombre, string descripcion, int oro)
+        {
+            Item item = new Item(nombre, descripcion);
+
+            _player.Inventario.Add(item);
+            _player.Oro += oro;
+
+            Typewriter("\n¡Obtuviste una recompensa!\n");
+            Typewriter($"Objeto: {nombre}\n");
+            Typewriter($"Oro recibido: {oro}\n");
+        }
+        public void UsePotion()
+        {
+            Item potion = null;
+
+            foreach (Item item in _player.Inventario)
+            {
+                if (item.Nombre == "Poción")
+                {
+                    potion = item;
+                    break;
+                }
+            }
+
+            if (potion != null)
+            {
+                _player.life += 20;
+
+                if (_player.life > 100)
+                    _player.life = 100;
+
+                _player.Inventario.Remove(potion);
+
+                Typewriter("\nUsaste una poción y recuperaste 20 de vida.\n");
+            }
+            else
+            {
+                Typewriter("\nNo tienes ninguna poción.\n");
+            }
+        }
+
         public void Show_Enemystats(Enemy enemy)
         {
             Typewriter("-------------------------------------------------------------- \n");
@@ -150,58 +249,9 @@ namespace Promedio1.scripts
         }
         public void Route()
         {
-            while (true)
-            {
-                Typewriter("A donde quieres ir? \n");
-
-                Console.WriteLine("1.- Ir al castillo abandonado");
-                Console.WriteLine("2.- Ir al bosque embrujado");
-                Console.WriteLine("3.- Ir a la tierra de fuego");
-                Console.WriteLine("4.- Ir al desierto");
-                Console.WriteLine("5.- Ir a la ciudad");
-                Console.WriteLine("6.- Ir a la caberna de mercenarios");
-                Console.WriteLine("7.- Ir al muelle");
-                Console.WriteLine("8.- Ir a la armeria");
-                Console.WriteLine("9.- Ir a la fuente de poder");
-                Console.WriteLine("10.- Ir a tu casa");
-
-                int answer = int.Parse(Console.ReadLine());
-
-                switch (answer)
-                {
-                    case 1:
-                        Castle();
-                        break;
-                    case 2:
-                        Woods();
-                        break;
-                    case 3:
-                        Fire();
-                        break;
-                    case 4:
-                        Desert();
-                        break;
-                    case 5:
-                        City();
-                        break;
-                    case 6:
-                        Bar();
-                        break;
-                    case 7:
-                        Bridge();
-                        break;
-                    case 8:
-                        Lake();
-                        break;
-                    case 9:
-                        fountain();
-                        break;
-                    case 10:
-                        home();
-                        break;
-                }
-            }
+            RecorrerNodos();
         }
+
         private void Castle()
         {
             Typewriter("Camino al castillo te encuentras con un perro lastimado en una trampa\n");
@@ -212,19 +262,20 @@ namespace Promedio1.scripts
                 Typewriter("2.- Atacarlo \n");
 
                 Typewriter("3.- Ver tus stats \n");
-                int answer = int.Parse(Console.ReadLine());
+                int answer = LeerNumero();
                 switch (answer)
                 {
                     case 1:
                         Console.WriteLine("Ayudaste al perro, y en recompensa, sacude su cola y te guía hacía un arbol donde hay un tesoro enterrado!");
                         Console.WriteLine("Ganaste un tesoro enterrado!");
+                        GiveReward("Tesoro enterrado", "Un tesoro encontrado gracias al perro.", 100);
                         FinishGame();
-                        break;
+                        return;
                     case 2:
                         Console.WriteLine("sacas tu espada para terminarlo, pero en eso, más perros salen del arbusto y te muerden hasta acabarte.");
                         Console.WriteLine("Has muerto");
                         FinishGame();
-                        break;
+                        return;
 
                     case 3:
                         Show_PlayerStats();
@@ -240,10 +291,12 @@ namespace Promedio1.scripts
             bool victory = Combat();
 
             if (victory)
+            {
                 Typewriter("\n¡Sobreviviste el bosque! Pero no has encontrado un tesoro aún, puedes continuar tu viaje.\n");
+                GiveReward("Poción", "Recupera 20 puntos de vida.", 0);
+            }
             else
                 Typewriter("\nFuiste derrotado en el bosque...\n");
-            FinishGame();
         }
         private void Fire()
         {
@@ -257,7 +310,7 @@ namespace Promedio1.scripts
                 Typewriter("2.- Ayudar \n");
 
                 Typewriter("3.- Ver tus stats \n");
-                int answer = int.Parse(Console.ReadLine());
+                int answer = LeerNumero();
                 switch (answer)
                 {
                     case 1:
@@ -275,7 +328,7 @@ namespace Promedio1.scripts
                         else
                             Typewriter("\nFuiste derrotado.\n");
                         FinishGame();
-                        break;
+                       return;
 
                     case 3:
                         Show_PlayerStats();
@@ -305,7 +358,7 @@ namespace Promedio1.scripts
             {
                 Typewriter("1.- Preguntar por un tesoro \n");
                 Typewriter("2.- Pedir una misión \n");
-                int answer = int.Parse(Console.ReadLine());
+                int answer = LeerNumero();
                 switch (answer)
                 {
                     case 1:
@@ -369,7 +422,7 @@ namespace Promedio1.scripts
             {
                 Typewriter("1.- Volver y buscar en otro lugar \n");
                 Typewriter("2.- Dormir un rato \n");
-                int answer = int.Parse(Console.ReadLine());
+                int answer = LeerNumero();
                 switch (answer)
                 {
                     case 1:
@@ -385,11 +438,155 @@ namespace Promedio1.scripts
         }
         public void FinishGame()
         {
-            Typewriter("\n------------------------------------");
-            Typewriter("EL JUEGO HA TERMINADO.");
-            Typewriter("Presiona cualquier tecla para salir...");
-            Typewriter("------------------------------------n");
+            Typewriter("\n------------------------------------\n");
+            Typewriter("EL JUEGO HA TERMINADO.\n");
+            Typewriter("Presiona cualquier tecla para salir...\n");
+            Typewriter("------------------------------------\n");
+
+            juegoTerminado = true;
+
             Console.ReadKey();
+        }
+        private void CrearNodos()
+        {
+            inicio = new Nodo(
+                "Inicio",
+                "Te encuentras frente a un camino misterioso."
+            );
+
+            castillo = new Nodo(
+                "Castillo",
+                "Un enorme castillo se alza frente a ti."
+            );
+
+            bosque = new Nodo(
+                "Bosque",
+                "Un bosque oscuro y silencioso."
+            );
+
+            fuego = new Nodo(
+                "Tierra de Fuego",
+                "El calor es intenso y el suelo está cubierto de cenizas."
+            );
+
+            desierto = new Nodo(
+                "Desierto",
+                "Un desierto interminable se extiende frente a ti."
+            );
+
+            ciudad = new Nodo(
+                "Ciudad",
+                "Llegas a una ciudad llena de personas."
+            );
+
+            bar = new Nodo(
+                "Bar",
+                "Un viejo bar se encuentra en una esquina."
+            );
+
+            puente = new Nodo(
+                "Puente",
+                "Un viejo puente cruza un enorme río."
+            );
+
+            lago = new Nodo(
+                "Lago",
+                "Un lago tranquilo refleja la luz del cielo."
+            );
+
+            fuente = new Nodo(
+                "Fuente",
+                "Encuentras una antigua fuente de piedra."
+            );
+
+            casa = new Nodo(
+                "Casa",
+                "Una pequeña casa se encuentra al final del camino."
+            );
+
+            castillo.Accion = () => Castle();
+            bosque.Accion = () => Woods();
+            fuego.Accion = () => Fire();
+            desierto.Accion = () => Desert();
+            ciudad.Accion = () => City();
+            bar.Accion = () => Bar();
+            puente.Accion = () => Bridge();
+            lago.Accion = () => Lake();
+            fuente.Accion = () => fountain();
+            casa.Accion = () => home();
+
+            inicio.AgregarOpcion(castillo);
+            inicio.AgregarOpcion(bosque);
+            inicio.AgregarOpcion(fuego);
+
+            castillo.AgregarOpcion(desierto);
+            castillo.AgregarOpcion(ciudad);
+
+            bosque.AgregarOpcion(puente);
+            bosque.AgregarOpcion(lago);
+
+            fuego.AgregarOpcion(desierto);
+
+            desierto.AgregarOpcion(ciudad);
+
+            ciudad.AgregarOpcion(bar);
+            ciudad.AgregarOpcion(fuente);
+
+            bar.AgregarOpcion(puente);
+
+            puente.AgregarOpcion(lago);
+
+            lago.AgregarOpcion(fuente);
+
+            fuente.AgregarOpcion(casa);
+        }
+        private void MostrarNodoActual()
+        {
+            Typewriter("\n====================================\n");
+            Typewriter(nodoActual.Nombre + "\n");
+            Typewriter("====================================\n");
+            Typewriter(nodoActual.Descripcion + "\n\n");
+
+            for (int i = 0; i < nodoActual.Opciones.Count; i++)
+            {
+                Typewriter($"{i + 1}. Ir a {nodoActual.Opciones[i].Nombre}\n");
+            }
+        }
+        private void RecorrerNodos()
+        {
+            while (nodoActual != null)
+            {
+                MostrarNodoActual();
+
+                if (nodoActual.Opciones.Count == 0)
+                {
+                    Typewriter("\nHas llegado al final de este camino.\n");
+                    break;
+                }
+
+                Typewriter("\nElige una opción: ");
+
+                int opcion = LeerNumero();
+
+                if (opcion >= 1 && opcion <= nodoActual.Opciones.Count)
+                {
+                    nodoActual = nodoActual.Opciones[opcion - 1];
+
+                    if (nodoActual.Accion != null)
+                    {
+                        nodoActual.Accion();
+                    }
+
+                    if (juegoTerminado)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    Typewriter("\nOpción inválida.\n");
+                }
+            }
         }
     }
 }

@@ -11,25 +11,56 @@ namespace S1_progra
     {
         static void Main(string[] args)
         {
-            Game game = new Game();
-            game.Typewriter("bienvenido a este juego \n");
-            game.Typewriter("Crea tu personaje: \n");
-            game.Typewriter("introduce tu nombre: \n");
+            Console.WriteLine("bienvenido a este juego");
+            Console.WriteLine("Crea tu personaje:");
+            Console.WriteLine("introduce tu nombre:");
 
-            string p1 = (Console.ReadLine());
+            string p1 = Console.ReadLine();
 
-            game.Typewriter("introduce tu vida: \n");
-            int p2 = int.Parse(Console.ReadLine());
-            if (p2 > 100) p2 = 0;
+            Console.WriteLine("introduce tu vida (1-100):");
+            int p2 = LeerNumero();
 
-            game.Typewriter("introduce tu daño: \n");
-            int p3 = int.Parse(Console.ReadLine());
-            if (p3 > 100) p3 = 0;
+            while (p2 < 1 || p2 > 100)
+            {
+                Console.WriteLine("La vida debe estar entre 1 y 100. Intenta nuevamente:");
+                p2 = LeerNumero();
+            }
 
-            game.CreateCharacter(p1, p2, p3); // p1 = 5
+            Console.WriteLine("introduce tu daño (1-100):");
+            int p3 = LeerNumero();
+
+            while (p3 < 1 || p3 > 100)
+            {
+                Console.WriteLine("El daño debe estar entre 1 y 100. Intenta nuevamente:");
+                p3 = LeerNumero();
+            }
+
+            Player player = new Player(p1, p2, p3);
+
+            Game game = new Game(player);
 
             game.Typewriter("Eres un caballero y estas en un viaje buscando un tesoro. Y tienes 10 opciones de calabozos: \n");
+
             game.Route();
+        }
+
+        static int LeerNumero()
+        {
+            while (true)
+            {
+                try
+                {
+                    return int.Parse(Console.ReadLine());
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine("Entrada inválida. Debes escribir un número.");
+                }
+                catch (OverflowException)
+                {
+                    Console.WriteLine("El número es demasiado grande.");
+                }
+            }
         }
     }
 }
