@@ -201,7 +201,7 @@ namespace Promedio1.scripts
             }
 
             MostrarHistorial();
-
+            
             Typewriter("-------------------------------------------------------------- \n");
             bool tienePocion = false;
 
